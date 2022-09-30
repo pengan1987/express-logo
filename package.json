@@ -1,0 +1,15 @@
+{
+  "name": "express-logo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "GPL",
+  "dependencies": {
+    "express": "^4.18.1",
+    "jslogo": "^1.0.2"
+  }
+}
