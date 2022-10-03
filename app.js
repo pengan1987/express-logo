@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = 3000
+const port = 9000
 const { execSync } = require('child_process');
 const fs = require('fs')
 
@@ -10,12 +10,12 @@ app.get('/', (req, res) => {
 
 app.get('/logo/:logoid', (req, res) => {
   let logoid = req.params['logoid']
-  let fileExist = fs.existsSync('out/' + logoid + '.png')
+  let fileExist = fs.existsSync('/tmp/' + logoid + '.png')
   if (!fileExist) {
-    let output = execSync('npx jslogo -f examples/' + logoid + '.lgo -o out/' + logoid);
+    let output = execSync('npx jslogo -f examples/' + logoid + '.lgo -o /tmp/' + logoid);
     //let bufferstring = output.toString()
   }
-  res.sendFile('out/' + logoid + '.png', { root: __dirname })
+  res.sendFile('/tmp/' + logoid + '.png')
 })
 
 app.listen(port, () => {
