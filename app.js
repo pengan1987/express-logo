@@ -12,27 +12,36 @@ app.get('/', (req, res) => {
 
 app.get('/logo/:logoid', (req, res) => {
   let logoid = req.params['logoid']
-  let jpgPath = '/tmp/' + logoid + '.jpg'
-  let fileExist = fs.existsSync(jpgPath)
+  let outputPath = '/tmp/' + logoid + '.png'
+  let fileExist = fs.existsSync(outputPath)
   if (!fileExist) {
     let lgoPath = logoStor + logoid + '.lgo';
+    try {
+      execSync('wget ' + lgoPath + ' -P /tmp/')
 
-    execSync('wget ' + lgoPath + ' -P /tmp/')
+      execSync('npx jslogo -f /tmp/' + logoid + '.lgo -o /tmp/' + logoid);
+      let pngPath = '/tmp/' + logoid + '.png'
 
-    execSync('npx jslogo -f /tmp/' + logoid + '.lgo -o /tmp/' + logoid);
-    let pngPath = '/tmp/' + logoid + '.png'
+      let dimensions = sizeOf(pngPath);
 
-    let dimensions = sizeOf(pngPath);
+      let gradientCmd = generateGradientCmd(dimensions.width, dimensions.height)
+      execSync(gradientCmd)
+      //make white background transprent
 
-    let gradientCmd = generateGradientCmd(dimensions.width, dimensions.height)
-    execSync(gradientCmd)
-    //make white background transprent
-    execSync("gm convert -transparent white " + pngPath + " " + pngPath)
-    //combine background gradient
-    execSync("gm composite " + pngPath + " /tmp/gradient.png " + jpgPath)
+      execSync("gm convert -monochrome " + pngPath + " " + pngPath)
+      execSync("gm convert -depth 32 -matte -fill transparent -opaque white " + pngPath + " " + pngPath)
+      //combine background gradient
+      execSync("gm composite " + pngPath + " /tmp/gradient.png " + outputPath)
+    } catch (ex) {
+      outputPath = "";
+    }
+  }
+  if (outputPath.length > 0) {
+    res.sendFile(outputPath)
+  } else {
+    res.sendFile('examples/broken-nft.jpg', { root: __dirname })
   }
 
-  res.sendFile(jpgPath)
 })
 
 app.listen(port, () => {
